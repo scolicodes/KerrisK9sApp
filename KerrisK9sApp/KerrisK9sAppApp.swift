@@ -11,7 +11,7 @@ import SwiftUI
 struct KerrisK9sAppApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            LoginPage()
         }
     }
 }
