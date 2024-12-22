@@ -6,6 +6,11 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		3762B2FC2D17AC99002AEF90 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 3762B2FB2D17AC99002AEF90 /* FirebaseAnalytics */; };
+		3762B2FF2D17B464002AEF90 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 3762B2FE2D17B464002AEF90 /* FirebaseAuth */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		3762B2972D150C1E002AEF90 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -52,6 +57,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3762B2FC2D17AC99002AEF90 /* FirebaseAnalytics in Frameworks */,
+				3762B2FF2D17B464002AEF90 /* FirebaseAuth in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -78,6 +85,7 @@
 				3762B2882D150C1A002AEF90 /* KerrisK9sApp */,
 				3762B2992D150C1E002AEF90 /* KerrisK9sAppTests */,
 				3762B2A32D150C1E002AEF90 /* KerrisK9sAppUITests */,
+				3762B2FD2D17B463002AEF90 /* Frameworks */,
 				3762B2872D150C1A002AEF90 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -90,6 +98,13 @@
 				3762B2A02D150C1E002AEF90 /* KerrisK9sAppUITests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		3762B2FD2D17B463002AEF90 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -112,6 +127,8 @@
 			);
 			name = KerrisK9sApp;
 			packageProductDependencies = (
+				3762B2FB2D17AC99002AEF90 /* FirebaseAnalytics */,
+				3762B2FE2D17B464002AEF90 /* FirebaseAuth */,
 			);
 			productName = KerrisK9sApp;
 			productReference = 3762B2862D150C1A002AEF90 /* KerrisK9sApp.app */;
@@ -195,6 +212,9 @@
 			);
 			mainGroup = 3762B27D2D150C1A002AEF90;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				3762B2FA2D17AC99002AEF90 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 3762B2872D150C1A002AEF90 /* Products */;
 			projectDirPath = "";
@@ -552,6 +572,30 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		3762B2FA2D17AC99002AEF90 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 11.6.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		3762B2FB2D17AC99002AEF90 /* FirebaseAnalytics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3762B2FA2D17AC99002AEF90 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAnalytics;
+		};
+		3762B2FE2D17B464002AEF90 /* FirebaseAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3762B2FA2D17AC99002AEF90 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAuth;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 3762B27E2D150C1A002AEF90 /* Project object */;
 }

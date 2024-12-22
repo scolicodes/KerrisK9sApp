@@ -151,7 +151,7 @@ struct SignUpPage: View {
 
             Spacer() // Push content up
         }
-        .padding(.vertical, 20) // Add vertical padding for better spacing
+         .padding(.vertical, 20) // Add vertical padding for better spacing
         .background(Color.white)
         .ignoresSafeArea()
     }
