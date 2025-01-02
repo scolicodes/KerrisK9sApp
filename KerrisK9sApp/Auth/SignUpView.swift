@@ -1,5 +1,5 @@
 //
-//  SignUpPage.swift
+//  SignUpView.swift
 //  KerrisK9sApp
 //
 //  Created by Michael Scoli on 12/21/24.
@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct SignUpPage: View {
+struct SignUpView: View {
     @State private var email: String = ""
     @State private var password: String = ""
     @State private var confirmPassword: String = ""

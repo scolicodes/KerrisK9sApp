@@ -8,14 +8,15 @@
 import SwiftUI
 import Firebase
 
-@main
-struct KerrisK9sAppApp: App {
+@main struct KerrisK9sAppApp: App {
     
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
     
     var body: some Scene {
         WindowGroup {
-            LoginPage()
+            NavigationStack {
+                RootView()
+            }
         }
     }
 }
