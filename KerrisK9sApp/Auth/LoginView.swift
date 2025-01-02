@@ -12,30 +12,21 @@ final class LoginViewModel: ObservableObject {
     @Published var email = ""
     @Published var password = ""
     
-    func signIn() {
+    func signIn() async throws {
         guard !email.isEmpty, !password.isEmpty else {
             print("No email or password found.")
             return
         }
         
-        Task {
-            do {
-                let returnedUserData = try await AuthManager.shared.createUser(email: email, password: password)
-                print("Success")
-                print(returnedUserData)
-            }
-            catch {
-                print("Error: \(error)")
-            }
-        }
+        try await AuthManager.shared.createUser(email: email, password: password)
     }
 }
 
 struct LoginView: View {
     
     @StateObject private var viewModel = LoginViewModel()
+    @Binding var showLoginView: Bool
     
-
     var body: some View {
         VStack {
             Spacer()
@@ -67,7 +58,16 @@ struct LoginView: View {
                 .padding(.horizontal, 16)
                 .padding(.top, 10)
             Button(action: {
-                viewModel.signIn()
+                Task {
+                    do {
+                        try await viewModel.signIn()
+                        showLoginView = false
+                    }
+                    catch {
+                        print(error)
+                    }
+                    
+                }
             }) {
                 Text("Login")
                     .fontWeight(.bold)
@@ -79,7 +79,7 @@ struct LoginView: View {
                     .padding(.horizontal, 16)
             }
             .padding(.top, 20)
-            NavigationLink(destination: SignUpView()) {
+            NavigationLink(destination: SignUpView(showLoginView: .constant(false))) {
                 Text("Don't have an account? Sign Up")
                     .font(.footnote)
                     .foregroundColor(Color.lightPink)
@@ -94,5 +94,5 @@ struct LoginView: View {
 }
 
 #Preview {
-    LoginView()
+    LoginView(showLoginView: .constant(false))
 }

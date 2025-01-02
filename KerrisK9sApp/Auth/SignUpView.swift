@@ -11,6 +11,7 @@ struct SignUpView: View {
     @State private var email: String = ""
     @State private var password: String = ""
     @State private var confirmPassword: String = ""
+    @Binding var showLoginView: Bool
 
     var body: some View {
         VStack {
