@@ -7,6 +7,21 @@
 
 import SwiftUI
 import FirebaseAuth
+import Foundation
+
+enum SignUpError: LocalizedError {
+    case emptyFields
+    case passwordsDoNotMatch
+
+    var errorDescription: String? {
+        switch self {
+        case .emptyFields:
+            return "Please fill in all fields."
+        case .passwordsDoNotMatch:
+            return "Passwords do not match."
+        }
+    }
+}
 
 @MainActor
 final class SignUpViewModel: ObservableObject {
@@ -16,14 +31,12 @@ final class SignUpViewModel: ObservableObject {
     
     func signUp() async throws {
         guard !email.isEmpty, !password.isEmpty, !confirmPassword.isEmpty else {
-            print("Please fill in all fields.")
-            return
+            throw SignUpError.emptyFields
         }
         
         // Check if passwords match
         guard password == confirmPassword else {
-            print("Passwords do not match.")
-            return
+            throw SignUpError.passwordsDoNotMatch
         }
         
         try await AuthManager.shared.createUser(email: email, password: password)
@@ -34,6 +47,7 @@ final class SignUpViewModel: ObservableObject {
 struct SignUpView: View {
     @StateObject private var viewModel = SignUpViewModel()
     @Binding var showLoginView: Bool
+    @State private var errorMessage: String?
 
     var body: some View {
         VStack {
@@ -84,7 +98,7 @@ struct SignUpView: View {
                             // Update showLoginView to trigger transition to SettingsView
                             showLoginView = false
                         } catch {
-                            print("Sign-up error: \(error)")
+                            errorMessage = error.localizedDescription
                         }
                     }
             }) {
@@ -98,6 +112,14 @@ struct SignUpView: View {
                     .padding(.horizontal, 16)
             }
             .padding(.top, 20)
+            
+            // Error Message
+            if let errorMessage {
+                Text(errorMessage)
+                    .font(.footnote)
+                    .foregroundColor(.red)
+                    .padding(.top, 10)
+            }
             Spacer()
         }
         .padding(.vertical, 20)
