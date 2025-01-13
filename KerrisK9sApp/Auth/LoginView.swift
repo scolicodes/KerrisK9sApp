@@ -18,7 +18,8 @@ final class LoginViewModel: ObservableObject {
             return
         }
         
-        try await AuthManager.shared.createUser(email: email, password: password)
+        try await AuthManager.shared.signInUser(email: email, password: password)
+        print("Login successful")
     }
 }
 
@@ -79,7 +80,7 @@ struct LoginView: View {
                     .padding(.horizontal, 16)
             }
             .padding(.top, 20)
-            NavigationLink(destination: SignUpView(showLoginView: .constant(false))) {
+            NavigationLink(destination: SignUpView(showLoginView: $showLoginView)) {
                 Text("Don't have an account? Sign Up")
                     .font(.footnote)
                     .foregroundColor(Color.lightPink)

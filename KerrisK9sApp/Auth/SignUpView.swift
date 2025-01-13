@@ -6,11 +6,33 @@
 //
 
 import SwiftUI
+import FirebaseAuth
+
+@MainActor
+final class SignUpViewModel: ObservableObject {
+    @Published var email = ""
+    @Published var password = ""
+    @Published var confirmPassword = ""
+    
+    func signUp() async throws {
+        guard !email.isEmpty, !password.isEmpty, !confirmPassword.isEmpty else {
+            print("Please fill in all fields.")
+            return
+        }
+        
+        // Check if passwords match
+        guard password == confirmPassword else {
+            print("Passwords do not match.")
+            return
+        }
+        
+        try await AuthManager.shared.createUser(email: email, password: password)
+        print("Sign-up successful")
+    }
+}
 
 struct SignUpView: View {
-    @State private var email: String = ""
-    @State private var password: String = ""
-    @State private var confirmPassword: String = ""
+    @StateObject private var viewModel = SignUpViewModel()
     @Binding var showLoginView: Bool
 
     var body: some View {
@@ -21,7 +43,7 @@ struct SignUpView: View {
                 .fontWeight(.bold)
                 .foregroundColor(Color.lightPink)
                 .padding(.bottom, 20)
-            TextField("Email", text: $email)
+            TextField("Email", text: $viewModel.email)
                 .padding()
                 .background(Color(.systemGray6))
                 .cornerRadius(8)
@@ -30,7 +52,10 @@ struct SignUpView: View {
                         .stroke(Color.lightPink, lineWidth: 1)
                     )
                 .padding(.horizontal, 16)
-            SecureField("Password", text: $password)
+                .autocapitalization(.none)
+                .keyboardType(.emailAddress)
+                .textInputAutocapitalization(.never)
+            SecureField("Password", text: $viewModel.password)
                 .padding()
                 .background(Color(.systemGray6))
                 .cornerRadius(8)
@@ -40,7 +65,7 @@ struct SignUpView: View {
                     )
                 .padding(.horizontal, 16)
                 .padding(.top, 10)
-            SecureField("Confirm Password", text: $confirmPassword)
+            SecureField("Confirm Password", text: $viewModel.confirmPassword)
                 .padding()
                 .background(Color(.systemGray6))
                 .cornerRadius(8)
@@ -51,7 +76,17 @@ struct SignUpView: View {
                 .padding(.horizontal, 16)
                 .padding(.top, 10)
             Button(action: {
-                // Handle sign-up
+                Task {
+                        do {
+                            try await viewModel.signUp()
+
+                            
+                            // Update showLoginView to trigger transition to SettingsView
+                            showLoginView = false
+                        } catch {
+                            print("Sign-up error: \(error)")
+                        }
+                    }
             }) {
                 Text("Sign Up")
                     .fontWeight(.bold)
