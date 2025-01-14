@@ -41,12 +41,11 @@ final class AuthManager {
     
     func getAuthenticatedUser() throws -> AuthDataResultModel {
         guard let user = Auth.auth().currentUser else {
-            throw URLError(.badServerResponse)
+            throw URLError(.badServerResponse) // temp error handling
         }
         
         return AuthDataResultModel(user: user)
     }
-    
     
     func signOut() throws {
         try Auth.auth().signOut()
@@ -54,5 +53,24 @@ final class AuthManager {
     
     func resetPassword(email: String) async throws {
         try await Auth.auth().sendPasswordReset(withEmail: email)
+    }
+    
+    func updatePassword(password: String) async throws {
+        guard let user = Auth.auth().currentUser else {
+            throw URLError(.badServerResponse) // temp error handling
+        }
+        
+        try await user.updatePassword(to: password)
+    }
+    
+    func updateEmail(email: String) async throws {
+        guard let user = Auth.auth().currentUser else {
+            throw URLError(.badServerResponse) // temp error handling
+        }
+        
+        try await user.updateEmail(to: email)
+        
+//        try await user.sendEmailVerification()
+//           print("Verification email sent. Please verify your new email to complete the update.")
     }
 }
