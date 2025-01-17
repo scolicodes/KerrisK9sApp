@@ -6,6 +6,14 @@
 //
 
 import SwiftUI
+import GoogleSignIn
+import GoogleSignInSwift
+import FirebaseAuth
+
+struct GoogleSignInResultModel {
+    let idToken: String
+    let accessToken: String
+}
 
 @MainActor
 final class LoginViewModel: ObservableObject {
@@ -21,7 +29,30 @@ final class LoginViewModel: ObservableObject {
         try await AuthManager.shared.signInUser(email: email, password: password)
         print("Login successful")
     }
+    
+    func signInGoogle() async throws {
+        guard let topVC = Utilities.shared.topViewController() else {
+            throw URLError(.cannotFindHost)
+        }
+        
+        let gidSignInResult = try await GIDSignIn.sharedInstance.signIn(withPresenting: topVC)
+        
+        
+        guard let idToken: String = gidSignInResult.user.idToken?.tokenString else {
+            throw URLError(.badServerResponse)
+        }
+        
+        let accessToken: String = gidSignInResult.user.accessToken.tokenString
+        
+        let tokens = GoogleSignInResultModel(idToken: idToken, accessToken: accessToken)
+        try await AuthManager.shared.signInWithGoogle(tokens: tokens)
+    }
 }
+    
+
+        
+   
+
 
 struct LoginView: View {
     
@@ -79,6 +110,20 @@ struct LoginView: View {
                     .cornerRadius(8)
                     .padding(.horizontal, 16)
             }
+            
+            GoogleSignInButton(viewModel: GoogleSignInButtonViewModel(scheme: .dark, style: .wide, state: .normal))  {
+                Task {
+                    do {
+                        try await viewModel.signInGoogle()
+                        showLoginView = false
+                    }
+                    catch {
+                        print(error)
+                    }
+                }
+                
+            }
+            
             .padding(.top, 20)
             NavigationLink(destination: SignUpView(showLoginView: $showLoginView)) {
                 Text("Don't have an account? Sign Up")
