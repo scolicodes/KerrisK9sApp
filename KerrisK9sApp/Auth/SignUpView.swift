@@ -89,11 +89,23 @@ struct SignUpView: View {
                     )
                 .padding(.horizontal, 16)
                 .padding(.top, 10)
+            
+            // Error Message
+            if let errorMessage {
+                Text(errorMessage)
+                    .font(.footnote)
+                    .foregroundColor(.red)
+                    .padding(.top, 5)
+            }
+            else {
+                Spacer().frame(height: 20)
+            }
+            
             Button(action: {
                 Task {
                         do {
                             try await viewModel.signUp()
-
+ 
                             
                             // Update showLoginView to trigger transition to SettingsView
                             showLoginView = false
@@ -111,15 +123,9 @@ struct SignUpView: View {
                     .cornerRadius(8)
                     .padding(.horizontal, 16)
             }
-            .padding(.top, 20)
+//            .padding(.top, 20)
             
-            // Error Message
-            if let errorMessage {
-                Text(errorMessage)
-                    .font(.footnote)
-                    .foregroundColor(.red)
-                    .padding(.top, 10)
-            }
+            
             Spacer()
         }
         .padding(.vertical, 20)

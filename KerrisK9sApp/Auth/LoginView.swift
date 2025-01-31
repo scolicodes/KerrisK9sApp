@@ -8,12 +8,8 @@
 import SwiftUI
 import GoogleSignIn
 import GoogleSignInSwift
-import FirebaseAuth
 
-struct GoogleSignInResultModel {
-    let idToken: String
-    let accessToken: String
-}
+
 
 @MainActor
 final class LoginViewModel: ObservableObject {
@@ -22,8 +18,7 @@ final class LoginViewModel: ObservableObject {
     
     func signIn() async throws {
         guard !email.isEmpty, !password.isEmpty else {
-            print("No email or password found.")
-            return
+            throw NSError(domain: "", code: 400, userInfo: [NSLocalizedDescriptionKey: "Email and password cannot be empty."])
         }
         
         try await AuthManager.shared.signInUser(email: email, password: password)
@@ -31,113 +26,112 @@ final class LoginViewModel: ObservableObject {
     }
     
     func signInGoogle() async throws {
-        guard let topVC = Utilities.shared.topViewController() else {
-            throw URLError(.cannotFindHost)
-        }
-        
-        let gidSignInResult = try await GIDSignIn.sharedInstance.signIn(withPresenting: topVC)
-        
-        
-        guard let idToken: String = gidSignInResult.user.idToken?.tokenString else {
-            throw URLError(.badServerResponse)
-        }
-        
-        let accessToken: String = gidSignInResult.user.accessToken.tokenString
-        
-        let tokens = GoogleSignInResultModel(idToken: idToken, accessToken: accessToken)
+        let helper = SignInGoogleHelper()
+        let tokens = try await helper.signIn()
         try await AuthManager.shared.signInWithGoogle(tokens: tokens)
     }
 }
     
 
-        
-   
-
-
 struct LoginView: View {
     
     @StateObject private var viewModel = LoginViewModel()
     @Binding var showLoginView: Bool
+    @State private var errorMessage: String?
     
     var body: some View {
-        VStack {
-            Spacer()
-            Image("KerrisLogo")
-                .resizable()
-                .scaledToFit()
-                .frame(width: 200)
-                .padding(.bottom, 20)
-            TextField("Email", text: $viewModel.email)
-                .padding()
-                .background(Color(.systemGray6))
-                .cornerRadius(8)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 8)
-                        .stroke(Color.lightPink, lineWidth: 1)
-                )
-                .padding(.horizontal, 16)
-                .autocapitalization(.none)
-                .keyboardType(.emailAddress)
-                .textInputAutocapitalization(.never)
-            SecureField("Password", text: $viewModel.password)
-                .padding()
-                .background(Color(.systemGray6))
-                .cornerRadius(8)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 8)
-                        .stroke(Color.lightPink, lineWidth: 1)
-                )
-                .padding(.horizontal, 16)
-                .padding(.top, 10)
-            Button(action: {
-                Task {
-                    do {
-                        try await viewModel.signIn()
-                        showLoginView = false
-                    }
-                    catch {
-                        print(error)
-                    }
-                    
-                }
-            }) {
-                Text("Login")
-                    .fontWeight(.bold)
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
+            VStack {
+                Spacer()
+                Image("KerrisLogo")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 200)
+                    .padding(.bottom, 20)
+                
+                TextField("Email", text: $viewModel.email)
                     .padding()
-                    .background(Color.lightPink)
+                    .background(Color(.systemGray6))
                     .cornerRadius(8)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 8)
+                            .stroke(Color.lightPink, lineWidth: 1)
+                    )
                     .padding(.horizontal, 16)
-            }
-            
-            GoogleSignInButton(viewModel: GoogleSignInButtonViewModel(scheme: .dark, style: .wide, state: .normal))  {
-                Task {
-                    do {
-                        try await viewModel.signInGoogle()
-                        showLoginView = false
-                    }
-                    catch {
-                        print(error)
-                    }
+                    .autocapitalization(.none)
+                    .keyboardType(.emailAddress)
+                    .textInputAutocapitalization(.never)
+                
+                SecureField("Password", text: $viewModel.password)
+                    .padding()
+                    .background(Color(.systemGray6))
+                    .cornerRadius(8)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 8)
+                            .stroke(Color.lightPink, lineWidth: 1)
+                    )
+                    .padding(.horizontal, 16)
+                    .padding(.top, 10)
+
+                if let errorMessage {
+                    Text(errorMessage)
+                        .font(.footnote)
+                        .foregroundColor(.red)
+                        .padding(.top, 5)
+                        .padding(.horizontal, 16)
                 }
                 
+                Button(action: {
+                    Task {
+                        do {
+                            try await viewModel.signIn()
+                            showLoginView = false
+                        } catch {
+                            errorMessage = error.localizedDescription  // Update UI with error
+                        }
+                    }
+                }) {
+                    Text("Login")
+                        .fontWeight(.bold)
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color.lightPink)
+                        .cornerRadius(8)
+                        .padding(.horizontal, 16)
+                }
+                
+                HStack {
+                    Spacer()
+                    GoogleSignInButton(viewModel: GoogleSignInButtonViewModel(scheme: .dark, style: .wide, state: .normal)) {
+                        Task {
+                            do {
+                                try await viewModel.signInGoogle()
+                                showLoginView = false
+                            }
+                            catch {
+                                print(error)
+                            }
+                        }
+                    }
+                    .frame(width: 250, height: 50) // Adjust width and height for a better fit
+                    .cornerRadius(10) // Smooth rounded edges
+                    Spacer()
+                }
+                .padding(.top, 20)
+
+                NavigationLink(destination: SignUpView(showLoginView: $showLoginView)) {
+                    Text("Don't have an account? Sign Up")
+                        .font(.footnote)
+                        .foregroundColor(Color.lightPink)
+                        .padding(.top, 10)
+                }
+                Spacer()
             }
-            
-            .padding(.top, 20)
-            NavigationLink(destination: SignUpView(showLoginView: $showLoginView)) {
-                Text("Don't have an account? Sign Up")
-                    .font(.footnote)
-                    .foregroundColor(Color.lightPink)
-                    .padding(.top, 10)
-            }
-            Spacer()
+            .padding(.vertical, 20)
+            .background(Color.white)
+            .ignoresSafeArea()
         }
-        .padding(.vertical, 20)
-        .background(Color.white)
-        .ignoresSafeArea()
     }
-}
 
 #Preview {
     LoginView(showLoginView: .constant(false))
