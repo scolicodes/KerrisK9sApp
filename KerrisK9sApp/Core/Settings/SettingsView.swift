@@ -7,42 +7,7 @@
 
 import SwiftUI
 
-@MainActor
-final class SettingsViewModel: ObservableObject {
-    
-    @Published var authProviders: [AuthProviderOption] = []
-    
-    func loadAuthProviders() {
-        if let providers = try? AuthManager.shared.getProviders() {
-            authProviders = providers
-        }
-            
-    }
-    
-    func signOut() throws {
-        try AuthManager.shared.signOut()
-    }
-    
-    func resetPassword() async throws {
-        let authUser = try AuthManager.shared.getAuthenticatedUser()
-        
-        guard let email = authUser.email else {
-            throw URLError(.fileDoesNotExist) // change this to actually handle error in UI
-        }
-        
-        try await AuthManager.shared.resetPassword(email: email)
-    }
-    
-    func updateEmail() async throws {
-        let email = "hello123@gmail.com" // temp hardcoded email
-        try await AuthManager.shared.updateEmail(email: email)
-    }
-    
-    func updatePassword() async throws {
-        let password = "hello123" // temp hardcoded password
-        try await AuthManager.shared.updatePassword(password: password)
-    }
-}
+
 
 struct SettingsView: View {
     
@@ -61,6 +26,20 @@ struct SettingsView: View {
                         print(error) // actually handle this error and display it to user
                     }
                 }
+            }
+            
+            Button(role: .destructive) {
+                Task {
+                    do {
+                        try await viewModel.deleteAccount()
+                        showLoginView = true
+                    }
+                    catch {
+                        print(error) // actually handle this error and display it to user
+                    }
+                }
+            } label: {
+                Text("Delete account")
             }
             
             if viewModel.authProviders.contains(.email) {
