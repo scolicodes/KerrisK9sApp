@@ -18,13 +18,13 @@ final class LoginViewModel: ObservableObject {
         }
         
         try await AuthManager.shared.signInUser(email: email, password: password)
-        print("Login successful")
     }
     
     func signInGoogle() async throws {
         let helper = SignInGoogleHelper()
         let tokens = try await helper.signIn()
-        try await AuthManager.shared.signInWithGoogle(tokens: tokens)
+        let authDataResult = try await AuthManager.shared.signInWithGoogle(tokens: tokens)
+        try await UserManager.shared.createNewUser(auth: authDataResult)
     }
 }
     

@@ -39,8 +39,9 @@ final class SignUpViewModel: ObservableObject {
             throw SignUpError.passwordsDoNotMatch
         }
         
+        let authDataResult = try await AuthManager.shared.signInUser(email: email, password: password)
         try await AuthManager.shared.createUser(email: email, password: password)
-        print("Sign-up successful")
+        
     }
 }
 
