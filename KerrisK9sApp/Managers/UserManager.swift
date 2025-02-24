@@ -7,13 +7,7 @@
 
 import Foundation
 import FirebaseFirestore
-
-struct DBUser {
-    let userId: String
-    let email: String?
-    let photoUrl: String?
-    let dateCreated: Date?
-}
+ 
 
 final class UserManager {
     
