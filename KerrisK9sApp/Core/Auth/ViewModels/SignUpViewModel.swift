@@ -21,18 +21,24 @@ final class SignUpViewModel: ObservableObject {
     @Published var password = ""
     @Published var confirmPassword = ""
     
+    private let adminEmails = ["kerri1@example.com", "kerri2@example.com"] // Hardcoded admin emails
+    
     func signUp() async throws {
         guard !email.isEmpty, !password.isEmpty, !confirmPassword.isEmpty else {
             throw SignUpError.emptyFields
         }
         
-        // Check if passwords match
         guard password == confirmPassword else {
             throw SignUpError.passwordsDoNotMatch
         }
         
-        let authDataResult = try await AuthManager.shared.signInUser(email: email, password: password)
-        try await AuthManager.shared.createUser(email: email, password: password)
+        let authDataResult = try await AuthManager.shared.createUser(email: email, password: password)
+        
+        let role: UserRole = adminEmails.contains(email) ? .admin : .walker
+        
+        let user = DBUser(auth: authDataResult, role: role)
+        try await UserManager.shared.createNewUser(user: user)
         
     }
+
 }

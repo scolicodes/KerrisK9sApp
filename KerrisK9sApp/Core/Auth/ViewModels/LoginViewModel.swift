@@ -24,7 +24,12 @@ final class LoginViewModel: ObservableObject {
         let helper = SignInGoogleHelper()
         let tokens = try await helper.signIn()
         let authDataResult = try await AuthManager.shared.signInWithGoogle(tokens: tokens)
-        try await UserManager.shared.createNewUser(auth: authDataResult)
+        
+        let existingUser = try? await UserManager.shared.getUser(userId: authDataResult.uid)
+        let role = existingUser?.role ?? .walker  // Default role is walker
+
+        let user = DBUser(auth: authDataResult, role: role)
+        try await UserManager.shared.createNewUser(user: user)
     }
 }
     

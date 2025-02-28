@@ -1,16 +1,6 @@
-//
-//  SettingsView.swift
-//  KerrisK9sApp
-//
-//  Created by Michael Scoli on 12/23/24.
-//
-
 import SwiftUI
 
-
-
 struct SettingsView: View {
-    
     @StateObject private var viewModel = SettingsViewModel()
     @Binding var showLoginView: Bool
     
@@ -21,56 +11,54 @@ struct SettingsView: View {
                     do {
                         try viewModel.signOut()
                         showLoginView = true
+                    } catch {
+                        print("Error logging out: \(error.localizedDescription)")
                     }
-                    catch {
-                        print(error) // actually handle this error and display it to user
+                }
+            }
+
+            if viewModel.isAdmin {
+                Section(header: Text("Admin Settings")) {
+                    Button("Manage Walk Schedules") {
+                        // TODO: Open Schedule Manager
                     }
                 }
             }
             
-            Button(role: .destructive) {
-                Task {
-                    do {
-                        try await viewModel.deleteAccount()
-                        showLoginView = true
+            Section {
+                Button(role: .destructive) {
+                    Task {
+                        do {
+                            try await viewModel.deleteAccount()
+                            showLoginView = true
+                        } catch {
+                            print("Error deleting account: \(error.localizedDescription)")
+                        }
                     }
-                    catch {
-                        print(error) // actually handle this error and display it to user
-                    }
+                } label: {
+                    Text("Delete Account")
                 }
-            } label: {
-                Text("Delete account")
             }
             
-            if viewModel.authProviders.contains(.email) {
-                emailSection
-            }
-            
+            emailSection
         }
         .onAppear {
-            viewModel.loadAuthProviders()
+            Task {
+                await viewModel.loadCurrentUser()  // ✅ Ensure isAdmin updates
+            }
         }
         .navigationBarTitle("Settings")
     }
-}
-
-#Preview {
-    NavigationStack {
-        SettingsView(showLoginView: .constant(false))
-    }
-}
-
-extension SettingsView {
+    
     private var emailSection: some View {
-        Section {
+        Section(header: Text("Email Functions")) {
             Button("Reset password") {
                 Task {
                     do {
                         try await viewModel.resetPassword()
                         print("Password Reset!")
-                    }
-                    catch {
-                        print(error) // actually handle this error and display it to user
+                    } catch {
+                        print("Error resetting password: \(error.localizedDescription)")
                     }
                 }
             }
@@ -79,9 +67,8 @@ extension SettingsView {
                     do {
                         try await viewModel.updatePassword()
                         print("Password Updated!")
-                    }
-                    catch {
-                        print(error) // actually handle this error and display it to user
+                    } catch {
+                        print("Error updating password: \(error.localizedDescription)")
                     }
                 }
             }
@@ -90,14 +77,17 @@ extension SettingsView {
                     do {
                         try await viewModel.updateEmail()
                         print("Email Updated!")
-                    }
-                    catch {
-                        print(error) // actually handle this error and display it to user
+                    } catch {
+                        print("Error updating email: \(error.localizedDescription)")
                     }
                 }
             }
-        } header: {
-            Text("Email functions")
         }
+    }
+}
+
+#Preview {
+    NavigationStack {
+        SettingsView(showLoginView: .constant(false))
     }
 }
